@@ -1,0 +1,167 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "sean",
+    "version": "1.0.0",
+    "title": "TEST-API",
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Test Request",
+      "description": "Example API for requesting and return employee requests"
+    }
+  ],
+  "paths": {
+    "/employees": {
+      "get": {
+        "tags": [
+          "Employee Request"
+        ],
+        "summary": "Returns employee Requests",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/employeeRequests"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Employee Request"
+        ],
+        "summary": "Create a new employee entry",
+        "requestBody": {
+          "description": "Employee Request Post Object",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/employeeRequestPostBody"
+              }
+            }
+          }
+        },
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          },
+          "400": {
+            "description": "Failed. Bad post data."
+          }
+        }
+      }
+    },
+    "/employees/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "description": "ID of the employee that we want to match",
+          "type": "string"
+        }
+      ],
+      "get": {
+        "tags": [
+          "Employee Request"
+        ],
+        "summary": "Get employee request with given ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "Employee Request id",
+            "schema": {
+              "$ref": "#/components/schemas/id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/components/schemas/employeeRequest"
+            }
+          },
+          "400": {
+            "description": "Failed. Misunderstood Request."
+          },
+          "404": {
+            "description": "Failed. Employee request not found."
+          }
+        }
+      }          
+    }
+  },
+  "components": {
+    "schemas": {
+      "id": {
+        "properties": {
+          "uuid": {
+            "type": "string"
+          }
+        }
+      },
+      "employeeRequestPostBody": {
+        "type": "object",
+        "teamName": {
+          "title": {
+            "type": "string",
+            "format": "string"
+          },
+          "roleName": {
+            "type": "string",
+            "format": "string"
+          }
+        }
+      },
+      "employeeRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "format": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "number"
+          }
+        }
+      },
+      "employeeRequests": {
+        "type": "object",
+        "properties": {
+          "employeeRequest": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/employeeRequest"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

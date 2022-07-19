@@ -7,31 +7,65 @@ import './App.css';
 const baseURL = 'http://localhost:5000/'
 
 function App() {
-  const [description, setDescription] = useState("");
-  const [eventsList, setEventsList] = useState([]);
-  
+  //const [description, setDescription] = useState("");
+  //const [eventsList, setEventsList] = useState([]);
+  const [allValues, setAllValues] = useState({
+    teamName : '',
+    roleName : ''
+  });
+
+  const [employeesList, setEmployeesList] = useState([]);
+
+
+  //const [roleName, setRoleName] = useState("");
 
   const fetchEvents =  async () => {
-    const data = await axios.get(`${baseURL}/events`)  
-    const { events } = data.data
-    setEventsList(events);
+    const data = await axios.get(`${baseURL}/employees`)  
+    const { employees } = data.data
+    setEmployeesList(employees);
     console.log("DATA: ",data)
   }
 
+  /*const handleChange = e => {
+    setAllValues( preValues =>{
+      return {...preValues, [e.target.name]: e.target.value}
+    });
+  }*/
+
   const handleChange = e => {
-    setDescription(e.target.value);
+    setAllValues({
+      ...allValues,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Methods': 'PUT, POST, GET, DELETE, PATCH, OPTIONS',
+    'Access-Control-Allow-Origin': '*'
   }
 
-  const handleSubmit = async (e) =>{  
+  const handleSubmit = async (e) => {  
     e.preventDefault();
+    console.log("Hola3")
     try{
-      const data = await axios.post(`${baseURL}/events`, {description}) 
-      setEventsList([...eventsList,data.data]);
-      setDescription('')
+      const data = await axios.post(`${baseURL}/employees`, {
+        teamName: allValues.teamName,
+        roleName: allValues.roleName
+        },{
+          headers: headers
+        }) 
+      console.log("DATA: ",data)
+      //setEmployeesList([...employeesList,data.data]);
+      //setAllValues('')
     } catch(err){
       console.error(err.message)
     }   
-    console.log(description);
+  }
+
+  const fetchEvents2=  async (e) => {
+    e.preventDefault();
+    console.log('Hola');
   }
 
   useEffect(() => {
@@ -42,19 +76,21 @@ function App() {
     <div className="App-header">
       <section >
         <form onSubmit={handleSubmit}>
-          <label htmlFor="description">Description</label>  
-          <input onChange={handleChange} type="text" name="description" id="description" value={description}/>
+          <label htmlFor="teamName">Team Name</label>  
+          <input onChange={handleChange} type="text" name="teamName" id="teamName" value={allValues.teamName}/>
+          <label htmlFor="roleName">Role Name</label>  
+          <input onChange={handleChange} type="text" name="roleName" id="roleName" value={allValues.roleName}/>
+          <input type="submit" value="Submit" /> 
         </form>
-        <button type="submit">Submit</button>  
-      </section>
+        
+      </section>     
       <section>
         <ul>
-          {eventsList.map(event =>{
-            return( <li key={event.id}>{event.description}</li> )
+          {employeesList.map(employee =>{
+            return( <li key={employee.id}>{employee.role_name}</li> )
           })}
         </ul>
-      </section>  
-      
+      </section>   
     </div>
   );
 }
