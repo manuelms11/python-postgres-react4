@@ -7,17 +7,12 @@ import './App.css';
 const baseURL = 'http://localhost:5000/'
 
 function App() {
-  //const [description, setDescription] = useState("");
-  //const [eventsList, setEventsList] = useState([]);
   const [allValues, setAllValues] = useState({
     teamName : '',
     roleName : ''
   });
+  const [employeesList, setEmployeesList] = useState([]); /*To show entries */
 
-  const [employeesList, setEmployeesList] = useState([]);
-
-
-  //const [roleName, setRoleName] = useState("");
 
   const fetchEvents =  async () => {
     const data = await axios.get(`${baseURL}/employees`)  
@@ -26,11 +21,6 @@ function App() {
     console.log("DATA: ",data)
   }
 
-  /*const handleChange = e => {
-    setAllValues( preValues =>{
-      return {...preValues, [e.target.name]: e.target.value}
-    });
-  }*/
 
   const handleChange = e => {
     setAllValues({
@@ -39,11 +29,6 @@ function App() {
     });
   };
 
-  const headers = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Methods': 'PUT, POST, GET, DELETE, PATCH, OPTIONS',
-    'Access-Control-Allow-Origin': '*'
-  }
 
   const handleSubmit = async (e) => {  
     e.preventDefault();
@@ -52,20 +37,12 @@ function App() {
       const data = await axios.post(`${baseURL}/employees`, {
         teamName: allValues.teamName,
         roleName: allValues.roleName
-        },{
-          headers: headers
         }) 
       console.log("DATA: ",data)
-      //setEmployeesList([...employeesList,data.data]);
-      //setAllValues('')
+      fetchEvents()
     } catch(err){
       console.error(err.message)
     }   
-  }
-
-  const fetchEvents2=  async (e) => {
-    e.preventDefault();
-    console.log('Hola');
   }
 
   useEffect(() => {

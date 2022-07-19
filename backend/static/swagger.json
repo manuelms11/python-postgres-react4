@@ -109,7 +109,32 @@
           }
         }
       }          
-    }
+    },
+    "/employees_role": {   
+        "parameters": [
+            {
+              "name": "team_name",
+              "in": "query",
+              "required": true,
+              "description": "ID of the employee that we want to match",
+              "type": "string"
+            }
+          ],   
+        "get": {
+            "tags": [
+              "Employee Request"
+            ],
+            "summary": "Returns employee Requests",
+            "responses": {
+              "200": {
+                "description": "OK",
+                "schema": {
+                  "$ref": "#/components/schemas/employeesRoleRquest"
+                }
+              }
+            }
+          }          
+      }
   },
   "components": {
     "schemas": {
@@ -120,10 +145,17 @@
           }
         }
       },
+      "team_name": {
+        "properties": {
+          "team_name": {
+            "type": "string"
+          }
+        }
+      },
       "employeeRequestPostBody": {
         "type": "object",
-        "teamName": {
-          "title": {
+        "properties": {
+          "teamName": {
             "type": "string",
             "format": "string"
           },
@@ -133,21 +165,13 @@
           }
         }
       },
-      "employeeRequest": {
+      "employeesRoleRquest": {
         "type": "object",
         "properties": {
-          "title": {
-            "type": "string",
-            "format": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "timestamp": {
-            "type": "string",
-            "format": "number"
-          }
+            "teamName": {
+                "type": "string",
+                "format": "string"
+            }       
         }
       },
       "employeeRequests": {
@@ -160,8 +184,17 @@
             }
           }
         }
+      },
+      "employeeRequest": {
+        "type": "object",
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "string"
+        }
       }
     }
   }
+}
 }
 

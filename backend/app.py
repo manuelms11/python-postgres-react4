@@ -1,4 +1,3 @@
-#from crypt import methods
 from flask import Flask, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -8,9 +7,9 @@ from flask_swagger_ui import get_swaggerui_blueprint
 
 app = Flask(__name__) #Flask class instance 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:pgadmin@localhost/babytracker'
-
 db = SQLAlchemy(app)
-CORS(app,resources={r'/*': {'origins': 'http://localhost:5000'}})
+
+CORS(app,resources={r'/*': {'origins': 'http://localhost:5000'}}) #Cross-Origin Resource Sharing 
 
 #Table
 class Employee(db.Model):
@@ -36,11 +35,8 @@ def format_employee(employee):
         "created_at": employee.created_at
     }
 
-#ENDPOINTS
-@app.route('/static/<path:path>')
-def send_static(path):
-    return send_from_directory('static',path)
 
+#SWAGGER CONFIG
 SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.json'
 swaggerui_blueprint = get_swaggerui_blueprint(
@@ -52,16 +48,22 @@ swaggerui_blueprint = get_swaggerui_blueprint(
 )
 app.register_blueprint(swaggerui_blueprint,url_prefix=SWAGGER_URL)
 
+#ENDPOINTS
+
+#SWAGGER ENDPOINT
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static',path)
+
+#TEST
 @app.route('/') #decorator
 def hello():
     return 'hey!'
-
 
 #Create Item
 @app.route('/employees',methods =['POST']) #POST REQUEST employee
 @cross_origin(origin='http://localhost:3000',headers=['Content- Type','Authorization'])
 def created_employee():
-    #request.headers.add('Access-Control-Allow-Origin', 'http://localhost:5000')
     team_name = request.json['teamName'] #Grab request from json body
     role_name = request.json['roleName'] #Grab request from json body
     employee = Employee(team_name,role_name) #Var employee, pass 'team_name' to Employee class
@@ -88,14 +90,13 @@ def get_employee(id):
     return {'employee': formated_employee} #return to frontend
 
 #Get single items 2
-@app.route('/employees_role',methods =['GET']) #GET REQUEST employee
+@app.route('/employees_role/',methods =['GET']) #GET REQUEST employee
 @cross_origin()
 def employees_role():
-    team_name = request.json['team_name']
+    team_name = request.args.get("team_name")
     employees = Employee.query.filter_by(team_name=team_name).one()
     formated_employee = format_employee(employees)
     return {'employee': formated_employee} #return to frontend
-
 
 if __name__ == '__main__':
     app.run()
