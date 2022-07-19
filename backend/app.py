@@ -1,60 +1,100 @@
 #from crypt import methods
-from flask import Flask, request
+from flask import Flask, request, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin 
+from flask_swagger_ui import get_swaggerui_blueprint
+
 
 app = Flask(__name__) #Flask class instance 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:pgadmin@localhost/babytracker'
-db = SQLAlchemy(app)
-CORS(app)
 
-class Event(db.Model):
+db = SQLAlchemy(app)
+CORS(app,resources={r'/*': {'origins': 'http://localhost:5000'}})
+
+#Table
+class Employee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(100),nullable=False) 
+    team_name = db.Column(db.String(100),nullable=False) 
+    role_name = db.Column(db.String(100),nullable=False) 
     created_at = db.Column(db.DateTime,nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
-        return F"Event: {self.description}"
+        return F"Employee: {self.team_name}"
 
-    def __init__(self,description):
-        self.description = description
+    def __init__(self,team_name,role_name):
+        self.team_name = team_name,
+        self.role_name = role_name
 
-def format_event(event):
+
+#Formater
+def format_employee(employee):
     return{
-        "description": event.description,
-        "id": event.id,
-        "created_at": event.created_at
+        "team_name": employee.team_name,
+        "role_name": employee.role_name,
+        "id": employee.id,
+        "created_at": employee.created_at
     }
+
+#ENDPOINTS
+@app.route('/static/<path:path>')
+def send_static(path):
+    return send_from_directory('static',path)
+
+SWAGGER_URL = '/swagger'
+API_URL = '/static/swagger.json'
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={
+        'app_name': "API_TEST"
+    }
+)
+app.register_blueprint(swaggerui_blueprint,url_prefix=SWAGGER_URL)
 
 @app.route('/') #decorator
 def hello():
     return 'hey!'
 
+
 #Create Item
-@app.route('/events',methods =['POST']) #POST REQUEST event
-def created_event():
-    description = request.json['description'] #Grab request from json body
-    event = Event(description) #Var event, pass 'description' to Event class
-    db.session.add(event) 
+@app.route('/employees',methods =['POST']) #POST REQUEST employee
+@cross_origin(origin='http://localhost:3000',headers=['Content- Type','Authorization'])
+def created_employee():
+    #request.headers.add('Access-Control-Allow-Origin', 'http://localhost:5000')
+    team_name = request.json['teamName'] #Grab request from json body
+    role_name = request.json['roleName'] #Grab request from json body
+    employee = Employee(team_name,role_name) #Var employee, pass 'team_name' to Employee class
+    db.session.add(employee) 
     db.session.commit()
-    return format_event(event) #return to frontend
+    return format_employee(employee) #return to frontend
 
 #Get all items
-@app.route('/events',methods =['GET']) #POST REQUEST event
-def get_events():
-    events = Event.query.order_by(Event.id.asc()).all()
-    event_list = []
-    for event in events:
-        event_list.append(format_event(event))
-    return {'events': event_list} #return to frontend
+@app.route('/employees',methods =['GET']) #GET REQUEST employee
+@cross_origin()
+def get_employees():
+    employees = Employee.query.order_by(Employee.id.asc()).all()
+    employee_list = []
+    for employee in employees:
+        employee_list.append(format_employee(employee))
+    return {'employees': employee_list} #return to frontend
 
 #Get single items
-@app.route('/events/<id>',methods =['GET']) #POST REQUEST event
-def get_event(id):
-    events = Event.query.filter_by(id=id).one()
-    formated_event = format_event(events)
-    return {'event': formated_event} #return to frontend
+@app.route('/employees/<id>',methods =['GET']) #GET REQUEST employee
+@cross_origin()
+def get_employee(id):
+    employees = Employee.query.filter_by(id=id).one()
+    formated_employee = format_employee(employees)
+    return {'employee': formated_employee} #return to frontend
+
+#Get single items 2
+@app.route('/employees_role',methods =['GET']) #GET REQUEST employee
+@cross_origin()
+def employees_role():
+    team_name = request.json['team_name']
+    employees = Employee.query.filter_by(team_name=team_name).one()
+    formated_employee = format_employee(employees)
+    return {'employee': formated_employee} #return to frontend
 
 
 if __name__ == '__main__':
